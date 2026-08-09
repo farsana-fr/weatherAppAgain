@@ -86,7 +86,17 @@ width:100%;
   margin-top: 25px;
   
 }
+.weekly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
+.weeklyStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* Individual weather cards */
 .weather-detail {
   
@@ -212,6 +222,9 @@ width:100%;
 }
 @media (max-width: 400px) {
   
+  .weeklyStatus{
+    font-size: small;
+  }
   .other {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -245,13 +258,7 @@ font-size: medium;
   text-align: center;
 }
 
-.weeklyStatus {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  margin: 15px 0;
-}
+
 .today h2,.feels{
 font-size: smaller;
 }

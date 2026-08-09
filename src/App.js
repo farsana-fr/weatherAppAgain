@@ -219,7 +219,7 @@ function Weekly({ location }) {
                       )}
               </span>
               <img src={el.day.condition.icon} alt={el.day.condition.text} />
-              <span>{el.day.condition.text}</span>
+              {/* <span>{el.day.condition.text}</span> */}
               <span>{el.day.mintemp_c}°C</span>
             </div>
           );
