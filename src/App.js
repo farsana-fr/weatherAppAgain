@@ -1,4 +1,4 @@
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
@@ -33,34 +33,36 @@ function Details({ handleInput, showInput }) {
   const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState("");
   const [todayForecast, setTodayForecast] = useState("");
-  const [timenow,setTimenow]=useState("");
+  const [timenow, setTimenow] = useState("");
   function handleCurrent(value) {
     setCurrent(value);
   }
-  useEffect(function(){
-    navigator.geolocation.getCurrentPosition((position) => {
-    setLatLong({
-      latitude: position.coords?.latitude,
-      longitude: position.coords?.longitude,
-    });
-  });
-  },[])
-  
   useEffect(function () {
-    if (!latlong.latitude || !latlong.longitude) return;
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLatLong({
+        latitude: position.coords?.latitude,
+        longitude: position.coords?.longitude,
+      });
+    });
+  }, []);
 
-    async function getLocationName() {
-      const res = await fetch(
-        `http://api.openweathermap.org/geo/1.0/reverse?lat=${latlong.latitude}&lon=${latlong.longitude}&limit=5&appid=${GEO_KEY}`,
-      );
-      const data = await res.json();
-      setIsLoading(false);
-      setLocation(data[0].name);
-      
-    }
-    getLocationName();
-  }, [latlong.latitude,latlong.longitude]);
-  
+  useEffect(
+    function () {
+      if (!latlong.latitude || !latlong.longitude) return;
+
+      async function getLocationName() {
+        const res = await fetch(
+          `https://api.openweathermap.org/geo/1.0/reverse?lat=${latlong.latitude}&lon=${latlong.longitude}&limit=5&appid=${GEO_KEY}`,
+        );
+        const data = await res.json();
+        setIsLoading(false);
+        setLocation(data[0].name);
+      }
+      getLocationName();
+    },
+    [latlong.latitude, latlong.longitude],
+  );
+
   useEffect(
     function () {
       if (!location) return;
@@ -69,10 +71,10 @@ function Details({ handleInput, showInput }) {
           `https://api.weatherapi.com/v1/forecast.json?q=${location}&key=${KEY}`,
         );
         const data = await res.json();
-        
+
         setTodayForecast(data?.forecast?.forecastday?.[0]);
         setTimenow(data.location.localtime);
-      console.log(data);
+        console.log(data);
       }
       getOtherDetails();
     },
@@ -90,8 +92,13 @@ function Details({ handleInput, showInput }) {
           isLoading={isLoading}
         />
 
-        <Today latlong={latlong} location={location} forecast={todayForecast} timeNDay={timenow}/>
-        <Weekly location={location}/>
+        <Today
+          latlong={latlong}
+          location={location}
+          forecast={todayForecast}
+          timeNDay={timenow}
+        />
+        <Weekly location={location} />
         <Other current={current} />
       </div>
     </>
@@ -159,71 +166,69 @@ function Other({ current }) {
 //   );
 // }
 
-function Today({ latlong, location, forecast,timeNDay }) {
-
- 
+function Today({ latlong, location, forecast, timeNDay }) {
   return (
     <div className="today">
-      
       <h2>Today is {timeNDay} </h2>
       <div className="todayStatus ">
         {forecast?.hour?.map((el) => (
-                <span className="todaythree m-2" key={el.time.split(" ")[1]}>
-                  <span className="fs-small">{el.time.split(" ")[1]}</span>
+          <span className="todaythree m-2" key={el.time.split(" ")[1]}>
+            <span className="fs-small">{el.time.split(" ")[1]}</span>
 
-                  <img
-                    src={el.condition.icon}
-                    alt={el.condition.text}
-                  />
+            <img src={el.condition.icon} alt={el.condition.text} />
 
-                  <span>{el.temp_c}°C</span>
-                </span>
-              ))}
+            <span>{el.temp_c}°C</span>
+          </span>
+        ))}
       </div>
     </div>
   );
 }
-function Weekly({location}) {
-  const [weekData,setWeekData]=useState(null);
-  useEffect(function(){
-    async function getWeeklyData(){
-      const res=await fetch(`https://api.weatherapi.com/v1/forecast.json?days=7&q=${location}&key=${KEY}`)
-      
-        const data=await res.json();
-        console.log("Weekly ",data.forecast.forecastday);
-        setWeekData(data.forecast.forecastday)
-    }
-    getWeeklyData();
-  }
-  ,[location])
-  if(weekData)
-    {
-      return <div className="weekly">
-        
-        {weekData.map((el,index)=>
-        {
-          return <div className="weeklyStatus " key={el.date}>
-            <span>{el.date}</span>
-            <span>{index===0?"Today":index===1?"Tomorrow":new Date(el.date_epoch * 1000).toLocaleDateString('en-US', { weekday: 'short' })}</span>
-            <img
-                    src={el.day.condition.icon}
-                    alt={el.day.condition.text}
-                  />
-<span>{el.day.condition.text}</span>
-                  <span>{el.day.mintemp_c}°C</span>
+function Weekly({ location }) {
+  const [weekData, setWeekData] = useState(null);
+  useEffect(
+    function () {
+      async function getWeeklyData() {
+        const res = await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?days=7&q=${location}&key=${KEY}`,
+        );
 
-          
-          </div>
-        }
-
-
-        )}
-
+        const data = await res.json();
+        console.log("Weekly ", data.forecast.forecastday);
+        setWeekData(data.forecast.forecastday);
+      }
+      getWeeklyData();
+    },
+    [location],
+  );
+  if (weekData) {
+    return (
+      <div className="weekly">
+        {weekData.map((el, index) => {
+          return (
+            <div className="weeklyStatus " key={el.date}>
+              <span>{el.date}</span>
+              <span>
+                {index === 0
+                  ? "Today"
+                  : index === 1
+                    ? "Tomorrow"
+                    : new Date(el.date_epoch * 1000).toLocaleDateString(
+                        "en-US",
+                        { weekday: "short" },
+                      )}
+              </span>
+              <img src={el.day.condition.icon} alt={el.day.condition.text} />
+              <span>{el.day.condition.text}</span>
+              <span>{el.day.mintemp_c}°C</span>
+            </div>
+          );
+        })}
       </div>
-    } 
+    );
+  }
 }
 function Now({ location, isLoading, current, handleCurrent }) {
-  
   useEffect(
     function () {
       if (!location) return;
@@ -231,13 +236,13 @@ function Now({ location, isLoading, current, handleCurrent }) {
         const res = await fetch(
           `http://api.weatherapi.com/v1/current.json?q=${location}&key=${KEY}`,
         );
-        
+
         const data = await res.json();
-        
+
         handleCurrent(data.current);
       }
       getCurrentDetails();
-    },// eslint-disable-next-line
+    }, // eslint-disable-next-line
     [location],
   );
 
