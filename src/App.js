@@ -234,7 +234,7 @@ function Now({ location, isLoading, current, handleCurrent }) {
       if (!location) return;
       async function getCurrentDetails() {
         const res = await fetch(
-          `http://api.weatherapi.com/v1/current.json?q=${location}&key=${KEY}`,
+          `https://api.weatherapi.com/v1/current.json?q=${location}&key=${KEY}`,
         );
 
         const data = await res.json();
