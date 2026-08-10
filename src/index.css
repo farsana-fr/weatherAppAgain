@@ -4,10 +4,19 @@ body,.app{
   
    font-family: "Michroma", sans-serif;
 }
+.background-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
 .app
 {
   
  height: auto;
+ color: white;
 }
 .weather{
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
@@ -18,23 +27,15 @@ body,.app{
 {
   opacity: 0.5;
 }
-.blue{
-  background-color: rgb(149, 196, 227);
-  
-  
-}
-.black
-{
-  background-color: rgb(54, 52, 50);
-  color:white;
-  
-}
+
 .details{
 width:100%;
 
 
 }
-
+.today{
+  margin-top: 10%;
+}
 
 
 .todaythree {
@@ -221,7 +222,9 @@ width:100%;
 }
 }
 @media (max-width: 400px) {
-  
+.weather,.temp{
+  font-size: xx-large;
+}
   .weeklyStatus{
     font-size: small;
   }

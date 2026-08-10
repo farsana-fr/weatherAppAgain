@@ -18,6 +18,7 @@ export default function App() {
   }
   return (
     <div className="app">
+      
       <Details showInput={showInput} handleInput={handleInput} />
 
       {showInput && <InputLocation setShowInput={setShowInput} />}
@@ -120,6 +121,15 @@ function Details({ handleInput, showInput }) {
   return (
     <>
       {current && <div className={`details  ${current?.is_day === 1 ? "blue" : "black"}`}>
+        <video
+    className="background-video"
+    autoPlay
+    loop
+    muted
+    playsInline
+  >
+    <source src={`${current?.is_day === 1 ? "/day.mp4" : "/night.mp4"}`} type="video/mp4" />
+  </video>
         <h2>{location}</h2>
         {/* {!showInput && <AddLocation handleInput={handleInput} />} */}
         <Now
