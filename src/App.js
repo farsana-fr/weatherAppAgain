@@ -215,7 +215,7 @@ function Other({ current }) {
 function Today({  forecast, timeNDay }) {
   return (
     <div className="today">
-      <h2>Today is {timeNDay.split(' ')[0]} {timeNDay.split(' ')[1]}</h2>
+      <h6>Today is {timeNDay.split(' ')[0]} {timeNDay.split(' ')[1]}</h6>
       <div className="todayStatus ">
         {forecast?.hour?.map((el) => (
           <span className="todaythree m-2" key={el.time.split(" ")[1]}>
