@@ -31,19 +31,39 @@ function Details({ handleInput, showInput }) {
   const [latlong, setLatLong] = useState({ latitude: null, longitude: null });
   const [location, setLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [current, setCurrent] = useState("");
+  const [current, setCurrent] = useState(null);
   const [todayForecast, setTodayForecast] = useState("");
   const [timenow, setTimenow] = useState("");
-  function handleCurrent(value) {
-    setCurrent(value);
-  }
+  const [weekData, setWeekData] = useState(null);
   useEffect(function () {
+
     navigator.geolocation.getCurrentPosition((position) => {
+            console.log(navigator)
+
       setLatLong({
         latitude: position.coords?.latitude,
         longitude: position.coords?.longitude,
       });
-    });
+
+    },
+   (error) => {
+
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          alert("Please allow location access");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          alert("Location information is unavailable.");
+          break;
+        case error.TIMEOUT:
+         alert("The request to get user location timed out.");
+          break;
+        default:
+          alert("An unknown error occurred.");
+          break;
+      }
+    }
+    );
   }, []);
 
   useEffect(
@@ -51,12 +71,20 @@ function Details({ handleInput, showInput }) {
       if (!latlong.latitude || !latlong.longitude) return;
 
       async function getLocationName() {
-        const res = await fetch(
+        try{
+          console.log("Next line fetching")
+          const res = await fetch(
           `https://api.openweathermap.org/geo/1.0/reverse?lat=${latlong.latitude}&lon=${latlong.longitude}&limit=5&appid=${GEO_KEY}`,
         );
+        console.log(res);
+        if(!res.ok)
+          throw new Error("Unable to get the location")
         const data = await res.json();
         setIsLoading(false);
         setLocation(data[0].name);
+      }
+      catch(err)
+       { alert(err.message);}
       }
       getLocationName();
     },
@@ -67,14 +95,23 @@ function Details({ handleInput, showInput }) {
     function () {
       if (!location) return;
       async function getOtherDetails() {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?q=${location}&key=${KEY}`,
+       try{
+         const res = await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?q=${location}&days=7&key=${KEY}`,
         );
+        if(!res.ok)
+          throw new Error("Unable to fetch today and weekly data from the API");
         const data = await res.json();
 
         setTodayForecast(data?.forecast?.forecastday?.[0]);
-        setTimenow(data.location.localtime);
+        setCurrent(data.current)
+        setTimenow(new Date(data.location.localtime_epoch*1000).toLocaleTimeString('en-US', { hour12: true }));
+        setWeekData(data.forecast.forecastday);
         console.log(data);
+       }
+       catch(err){
+        alert(err.message);
+       }
       }
       getOtherDetails();
     },
@@ -82,25 +119,24 @@ function Details({ handleInput, showInput }) {
   );
   return (
     <>
-      <div className={`details  ${current.is_day === 1 ? "blue" : "black"}`}>
+      {current && <div className={`details  ${current?.is_day === 1 ? "blue" : "black"}`}>
         <h2>{location}</h2>
         {/* {!showInput && <AddLocation handleInput={handleInput} />} */}
         <Now
-          location={location}
+      
           current={current}
-          handleCurrent={handleCurrent}
+        
           isLoading={isLoading}
         />
 
         <Today
-          latlong={latlong}
-          location={location}
+        
           forecast={todayForecast}
           timeNDay={timenow}
         />
-        <Weekly location={location} />
+        {weekData &&<Weekly weekData={weekData}  />}
         <Other current={current} />
-      </div>
+      </div>}
     </>
   );
 }
@@ -166,10 +202,10 @@ function Other({ current }) {
 //   );
 // }
 
-function Today({ latlong, location, forecast, timeNDay }) {
+function Today({  forecast, timeNDay }) {
   return (
     <div className="today">
-      <h2>Today is {timeNDay} </h2>
+      <h2>Today is {timeNDay.split(' ')[0]} {timeNDay.split(' ')[1]}</h2>
       <div className="todayStatus ">
         {forecast?.hour?.map((el) => (
           <span className="todaythree m-2" key={el.time.split(" ")[1]}>
@@ -184,23 +220,9 @@ function Today({ latlong, location, forecast, timeNDay }) {
     </div>
   );
 }
-function Weekly({ location }) {
-  const [weekData, setWeekData] = useState(null);
-  useEffect(
-    function () {
-      async function getWeeklyData() {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?days=7&q=${location}&key=${KEY}`,
-        );
-
-        const data = await res.json();
-        console.log("Weekly ", data.forecast.forecastday);
-        setWeekData(data.forecast.forecastday);
-      }
-      getWeeklyData();
-    },
-    [location],
-  );
+function Weekly({ weekData }) {
+  
+  
   if (weekData) {
     return (
       <div className="weekly">
@@ -228,23 +250,7 @@ function Weekly({ location }) {
     );
   }
 }
-function Now({ location, isLoading, current, handleCurrent }) {
-  useEffect(
-    function () {
-      if (!location) return;
-      async function getCurrentDetails() {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/current.json?q=${location}&key=${KEY}`,
-        );
-
-        const data = await res.json();
-
-        handleCurrent(data.current);
-      }
-      getCurrentDetails();
-    }, // eslint-disable-next-line
-    [location],
-  );
+function Now({  isLoading, current }) {
 
   const temperature = current?.temp_c;
   const feels_like = current?.feelslike_c;
@@ -255,7 +261,7 @@ function Now({ location, isLoading, current, handleCurrent }) {
         <Loader />
       ) : (
         <>
-          <span className="weather">{current?.weather?.[0]?.main}</span>
+          <span className="weather">{current?.condition?.text}</span>
           <br></br>
           <span className="feels">
             Feels like {feels_like}
