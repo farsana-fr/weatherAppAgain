@@ -106,7 +106,10 @@ function Details({ handleInput, showInput }) {
 
         setTodayForecast(data?.forecast?.forecastday?.[0]);
         setCurrent(data.current)
-        setTimenow(new Date(data.location.localtime_epoch*1000).toLocaleTimeString('en-US', { hour12: true }));
+        setTimenow(new Date(data.location.localtime_epoch*1000).toLocaleTimeString('en-US', { year: "numeric",
+  month: "long",
+  day: "numeric",
+   hour12: true }));
         setWeekData(data.forecast.forecastday);
         console.log(data);
        }
@@ -215,7 +218,7 @@ function Other({ current }) {
 function Today({  forecast, timeNDay }) {
   return (
     <div className="today">
-      <h6>Today is {timeNDay.split(' ')[0]} {timeNDay.split(' ')[1]}</h6>
+      <p>Today is {timeNDay}</p>
       <div className="todayStatus ">
         {forecast?.hour?.map((el) => (
           <span className="todaythree m-2" key={el.time.split(" ")[1]}>
