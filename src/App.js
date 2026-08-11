@@ -94,19 +94,32 @@ function Details({ handleInput, showInput }) {
 
   useEffect(
     function () {
+      let res;
+      let data;
       if (!location) return;
+      setLocation("Kozhencherry")
       async function getOtherDetails() {
        try{
-         const res = await fetch(
+         res = await fetch(
           `https://api.weatherapi.com/v1/forecast.json?q=${location}&days=7&key=${KEY}`,
         );
         if(!res.ok)
-          throw new Error("Unable to fetch today and weekly data from the API");
-        const data = await res.json();
+        {
+          res=await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?q=${latlong.latitude},${latlong.longitude}&days=7&key=${KEY}`,
+        );
+
+        }
+        if(!res.ok)
+         {
+          throw new Error(`Sorry! Unable to fetch data of your location: ${location}`);
+         } 
+         data = await res.json();
+        console.log(data);
 
         setTodayForecast(data?.forecast?.forecastday?.[0]);
         setCurrent(data.current)
-        setTimenow(new Date(data.location.localtime_epoch*1000).toLocaleTimeString('en-US', { year: "numeric",
+        setTimenow(new Date(data?.location.localtime_epoch*1000).toLocaleTimeString('en-US', { year: "numeric",
   month: "long",
   day: "numeric",
    hour12: true }));
@@ -119,7 +132,7 @@ function Details({ handleInput, showInput }) {
       }
       getOtherDetails();
     },
-    [location],
+    [location,latlong.latitude,latlong.longitude],
   );
   return (
     <>
