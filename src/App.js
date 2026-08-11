@@ -97,7 +97,6 @@ function Details({ handleInput, showInput }) {
       let res;
       let data;
       if (!location) return;
-      setLocation("Kozhencherry")
       async function getOtherDetails() {
        try{
          res = await fetch(
